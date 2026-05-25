@@ -1,87 +1,82 @@
 import { Link } from "react-router-dom";
-import { Scale, Mail, Shield, FileText, Star } from "lucide-react";
+import { Scale, Shield } from "lucide-react";
 
 export default function Footer({ onOpenEval }) {
   return (
-    <footer className="border-t border-[#D4AF37]/20 bg-[#080810] mt-20">
+    <footer className="border-t border-white/5 bg-[#080810]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="flex flex-col md:flex-row justify-between gap-10">
           {/* Brand */}
-          <div className="col-span-1 md:col-span-2">
+          <div className="max-w-xs">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#B8960C] flex items-center justify-center">
-                <Scale className="w-5 h-5 text-[#0A0A0F]" />
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#B8960C] flex items-center justify-center">
+                <Scale className="w-4 h-4 text-[#0A0A0F]" />
               </div>
-              <span className="text-xl font-bold gold-text">LexMind</span>
+              <span className="font-black text-lg text-white tracking-tight">
+                Lex<span className="gold-text">Mind</span>
+              </span>
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-              Inteligência Jurídica com Privacidade e Raciocínio. A IA que ensina,
-              não a IA que responde.
+            <p className="text-gray-500 text-sm leading-relaxed">
+              A IA que ensina, não a IA que responde.
+              Vault criptografado + Motor Socrático para a advocacia brasileira.
             </p>
-            <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/20 w-fit">
-              <Shield className="w-4 h-4 text-[#D4AF37]" />
-              <span className="text-xs text-[#D4AF37] font-medium">Em conformidade com a LGPD</span>
-            </div>
           </div>
 
           {/* Links */}
-          <div>
-            <h3 className="text-white font-semibold mb-4 text-sm">Plataforma</h3>
-            <ul className="space-y-2">
-              {[
-                { label: "Demonstrador", to: "/demonstrador" },
-                { label: "Arquitetura", to: "/arquitetura" },
-                { label: "Planos e Preços", to: "/planos" },
-                { label: "Segurança & LGPD", to: "/lgpd" },
-              ].map((l) => (
-                <li key={l.to}>
-                  <Link
-                    to={l.to}
-                    className="text-gray-400 text-sm hover:text-[#D4AF37] transition-colors"
-                  >
-                    {l.label}
-                  </Link>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
+            <div>
+              <p className="text-gray-300 font-semibold mb-3">Produto</p>
+              <ul className="space-y-2">
+                {[
+                  { label: "Demonstrador", to: "/demonstrador" },
+                  { label: "Arquitetura", to: "/arquitetura" },
+                  { label: "Planos", to: "/planos" },
+                ].map((l) => (
+                  <li key={l.to}>
+                    <Link to={l.to} className="text-gray-500 hover:text-gray-300 transition-colors">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-gray-300 font-semibold mb-3">Legal</p>
+              <ul className="space-y-2">
+                {[
+                  { label: "Segurança & LGPD", to: "/lgpd" },
+                  { label: "Política de Privacidade", to: "/lgpd" },
+                ].map((l) => (
+                  <li key={l.label}>
+                    <Link to={l.to} className="text-gray-500 hover:text-gray-300 transition-colors">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-gray-300 font-semibold mb-3">Contato</p>
+              <ul className="space-y-2">
+                <li><a href="mailto:contato@lexmind.com.br" className="text-gray-500 hover:text-gray-300 transition-colors">contato@lexmind.com.br</a></li>
+                <li><a href="mailto:dpo@lexmind.com.br" className="text-gray-500 hover:text-gray-300 transition-colors">dpo@lexmind.com.br</a></li>
+                <li>
+                  <button onClick={onOpenEval} className="text-[#D4AF37] hover:text-[#F0D060] transition-colors text-left">
+                    Formulário da Banca
+                  </button>
                 </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="text-white font-semibold mb-4 text-sm">Contato</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-gray-400 text-sm">
-                <Mail className="w-4 h-4 text-[#D4AF37]" />
-                contato@lexmind.com.br
-              </li>
-              <li className="flex items-center gap-2 text-gray-400 text-sm">
-                <FileText className="w-4 h-4 text-[#D4AF37]" />
-                <Link to="/lgpd" className="hover:text-[#D4AF37] transition-colors">
-                  Política de Privacidade
-                </Link>
-              </li>
-              <li>
-                <button
-                  onClick={onOpenEval}
-                  className="flex items-center gap-2 text-[#D4AF37] text-sm hover:underline"
-                >
-                  <Star className="w-4 h-4" />
-                  Formulário da Banca
-                </button>
-              </li>
-            </ul>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <hr className="section-divider my-8" />
-
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-500 text-xs text-center">
-            © 2026 LexMind. Todos os direitos reservados. MVP — Protótipo funcional para demonstração.
-          </p>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/20">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            <span className="text-xs text-gray-400">Sem vazamento de dados — promessa mantida</span>
+        <div className="mt-10 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-gray-600 text-xs">© 2026 LexMind. Todos os direitos reservados. MVP — Protótipo funcional.</p>
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-gray-600 text-xs flex items-center gap-1">
+              <Shield className="w-3 h-3" /> Sem vazamento de dados — promessa mantida
+            </span>
           </div>
         </div>
       </div>

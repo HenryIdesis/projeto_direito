@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Scale, Star } from "lucide-react";
+import { Menu, X, Scale } from "lucide-react";
 
-const navLinks = [
+const NAV = [
   { label: "Demonstrador", href: "/demonstrador" },
   { label: "Arquitetura", href: "/arquitetura" },
   { label: "Planos", href: "/planos" },
@@ -13,105 +13,122 @@ const navLinks = [
 export default function Header({ onOpenEval }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
+  const loc = useLocation();
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handler);
-    return () => window.removeEventListener("scroll", handler);
+    const fn = () => setScrolled(window.scrollY > 30);
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location]);
+  useEffect(() => setMenuOpen(false), [loc]);
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-[#0A0A0F]/95 backdrop-blur-md border-b border-[#D4AF37]/20 shadow-lg"
+          ? "bg-[#0A0A0F]/90 backdrop-blur-xl border-b border-white/8"
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#B8960C] flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(212,175,55,0.5)] transition-all duration-300">
-              <Scale className="w-5 h-5 text-[#0A0A0F]" />
-            </div>
-            <span className="text-xl font-bold gold-text">LexMind</span>
-          </Link>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#B8960C] flex items-center justify-center group-hover:shadow-[0_0_16px_rgba(212,175,55,0.4)] transition-shadow duration-300">
+            <Scale className="w-4 h-4 text-[#0A0A0F]" />
+          </div>
+          <span className="font-black text-lg tracking-tight text-white">
+            Lex<span className="gold-text">Mind</span>
+          </span>
+        </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-0.5">
+          {NAV.map((link) => {
+            const active = loc.pathname === link.href;
+            return (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  location.pathname === link.href
-                    ? "text-[#D4AF37] bg-[#D4AF37]/10"
-                    : "text-gray-400 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5"
+                className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  active ? "text-white" : "text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="nav-indicator"
+                    className="absolute inset-0 rounded-lg bg-white/8"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                  />
+                )}
+                <span className="relative">{link.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right side */}
+        <div className="hidden md:flex items-center gap-3">
+          <button
+            onClick={onOpenEval}
+            className="text-sm font-semibold text-gray-400 hover:text-white transition-colors duration-200"
+          >
+            Avaliar
+          </button>
+          <Link
+            to="/demonstrador"
+            className="px-4 py-2 rounded-lg btn-gold text-sm font-bold"
+          >
+            Ver demo →
+          </Link>
+        </div>
+
+        {/* Mobile */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/8 transition-colors"
+          aria-label="Menu"
+        >
+          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Mobile dropdown */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden bg-[#0C0C12]/98 backdrop-blur-xl border-b border-white/8 px-4 py-4 space-y-1"
+          >
+            {NAV.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                className={`block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  loc.pathname === link.href
+                    ? "text-[#D4AF37] bg-[#D4AF37]/8"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <button
-              onClick={onOpenEval}
-              className="ml-3 flex items-center gap-2 px-4 py-2 rounded-lg btn-gold text-sm"
-              aria-label="Abrir formulário de avaliação da banca"
-            >
-              <Star className="w-4 h-4" />
-              Avaliar
-            </button>
-          </nav>
-
-          {/* Mobile menu button */}
-          <div className="flex md:hidden items-center gap-2">
-            <button
-              onClick={onOpenEval}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg btn-gold text-xs"
-              aria-label="Avaliar"
-            >
-              <Star className="w-3 h-3" />
-              Avaliar
-            </button>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 rounded-lg text-gray-400 hover:text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors"
-              aria-label="Menu"
-            >
-              {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-[#0D0D14]/98 backdrop-blur-md border-b border-[#D4AF37]/20"
-          >
-            <div className="px-4 py-3 space-y-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === link.href
-                      ? "text-[#D4AF37] bg-[#D4AF37]/10"
-                      : "text-gray-400 hover:text-[#D4AF37] hover:bg-[#D4AF37]/5"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={onOpenEval}
+                className="flex-1 py-2.5 rounded-xl border border-white/10 text-gray-400 text-sm font-semibold hover:border-white/20 transition-colors"
+              >
+                Avaliar
+              </button>
+              <Link
+                to="/demonstrador"
+                className="flex-1 py-2.5 rounded-xl btn-gold text-sm font-bold text-center"
+              >
+                Ver demo
+              </Link>
             </div>
           </motion.div>
         )}

@@ -2,72 +2,65 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain, Shield, Scale, Clock, BookOpen, AlertCircle,
-  FileText, Zap, ChevronDown, CheckCircle, Lightbulb,
+  FileText, Zap, CheckCircle, Lightbulb,
   BarChart3, Network, RefreshCw, ThumbsUp, Meh, ThumbsDown,
-  Lock, Cpu, Sparkles
+  Lock, Cpu, Sparkles, ChevronDown, ArrowRight
 } from "lucide-react";
 import { analyzeCase, EXAMPLE_CASE } from "../mocks/mockSocraticEngine";
 
 const LOADING_STEPS = [
-  { icon: Lock, text: "Tokenizando dados sensíveis (simulação) — nenhum dado vaza para APIs externas...", color: "text-blue-400" },
-  { icon: Shield, text: "Verificando conformidade LGPD — dados anonimizados com sucesso...", color: "text-green-400" },
-  { icon: Cpu, text: "Enviando para ChatGPT (OpenAI) — classificador de áreas e legislação...", color: "text-purple-400" },
-  { icon: Brain, text: "Enviando para Claude (Anthropic) — orientador socrático jurídico...", color: "text-[#D4AF37]" },
-  { icon: Sparkles, text: "Gerando trilha de raciocínio jurídico personalizada...", color: "text-amber-400" },
+  { icon: Lock, text: "Tokenizando dados sensíveis — nenhum dado pessoal sairá para APIs externas", color: "text-blue-400" },
+  { icon: Shield, text: "Validando conformidade LGPD — dados anonimizados com sucesso", color: "text-green-400" },
+  { icon: Cpu, text: "Enviando para ChatGPT (OpenAI) — classificador de áreas e legislação", color: "text-purple-400" },
+  { icon: Brain, text: "Enviando para Claude (Anthropic) — construindo orientação socrática", color: "text-[#D4AF37]" },
+  { icon: Sparkles, text: "Gerando trilha de raciocínio jurídico personalizada", color: "text-amber-400" },
 ];
 
 const ICON_MAP = {
-  scale: Scale,
-  clock: Clock,
-  shield: Shield,
-  dollar: BarChart3,
-  book: BookOpen,
-  timer: Clock,
-  file: FileText,
-  alert: AlertCircle,
-  brain: Brain,
-  network: Network,
-  chart: BarChart3,
+  scale: Scale, clock: Clock, shield: Shield, dollar: BarChart3,
+  book: BookOpen, timer: Clock, file: FileText, alert: AlertCircle,
+  brain: Brain, network: Network, chart: BarChart3,
 };
 
 function QuestionCard({ q, index, delay }) {
   const Icon = ICON_MAP[q.icon] || Brain;
-  const levelColors = {
-    fundamental: "text-[#D4AF37] bg-[#D4AF37]/10 border-[#D4AF37]/20",
-    avancado: "text-purple-400 bg-purple-400/10 border-purple-400/20",
-  };
+  const isAdvanced = q.level === "avancado";
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, delay }}
-      className="gradient-border-card p-5 hover:translate-x-1 transition-all duration-300"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay }}
+      className={`relative flex gap-4 p-5 rounded-xl border transition-all duration-200 hover:border-[#D4AF37]/40 group ${
+        isAdvanced
+          ? "bg-purple-500/5 border-purple-500/20"
+          : "bg-white/[0.03] border-white/8"
+      }`}
     >
-      <div className="flex items-start gap-4">
-        <div className="shrink-0 w-10 h-10 rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center">
-          <Icon className="w-5 h-5 text-[#D4AF37]" />
+      {/* Number */}
+      <div className="shrink-0 flex flex-col items-center gap-2 pt-0.5">
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black ${
+          isAdvanced ? "bg-purple-500/20 text-purple-400" : "bg-[#D4AF37]/10 text-[#D4AF37]"
+        }`}>
+          {index + 1}
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-gray-500 text-xs font-mono">#{index + 1}</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${levelColors[q.level] || levelColors.fundamental}`}>
-              {q.level === "avancado" ? "Avançado" : "Fundamental"}
-            </span>
+        <Icon className={`w-3.5 h-3.5 ${isAdvanced ? "text-purple-400/40" : "text-[#D4AF37]/30"}`} />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-gray-100 text-sm leading-relaxed font-medium mb-1.5">{q.text}</p>
+        {q.context && (
+          <p className="text-gray-500 text-xs leading-relaxed flex gap-1.5">
+            <Lightbulb className="w-3 h-3 text-[#D4AF37]/40 mt-0.5 shrink-0" />
+            {q.context}
+          </p>
+        )}
+        {q.extraContext && (
+          <div className="mt-2 text-xs text-amber-300/80 bg-amber-500/8 border border-amber-500/15 rounded-lg px-3 py-2">
+            {q.extraContext}
           </div>
-          <p className="text-gray-100 text-sm leading-relaxed font-medium">{q.text}</p>
-          {q.context && (
-            <div className="mt-2 flex items-start gap-1.5">
-              <Lightbulb className="w-3.5 h-3.5 text-[#D4AF37]/60 mt-0.5 shrink-0" />
-              <p className="text-gray-500 text-xs italic">{q.context}</p>
-            </div>
-          )}
-          {q.extraContext && (
-            <div className="mt-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-              <p className="text-amber-300 text-xs">{q.extraContext}</p>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </motion.div>
   );
@@ -84,9 +77,7 @@ export default function Demonstrador({ onOpenEval }) {
   const resultRef = useRef(null);
   const intervalRef = useRef(null);
 
-  const handleUseExample = () => {
-    setText(EXAMPLE_CASE);
-  };
+  const handleUseExample = () => setText(EXAMPLE_CASE);
 
   const handleAnalyze = async () => {
     if (!text.trim()) return;
@@ -99,103 +90,93 @@ export default function Demonstrador({ onOpenEval }) {
     let step = 0;
     intervalRef.current = setInterval(() => {
       step++;
-      if (step >= LOADING_STEPS.length) {
-        clearInterval(intervalRef.current);
-      } else {
-        setLoadingStep(step);
-      }
-    }, 500);
+      if (step >= LOADING_STEPS.length) clearInterval(intervalRef.current);
+      else setLoadingStep(step);
+    }, 540);
 
-    await new Promise((r) => setTimeout(r, 2800));
+    await new Promise((r) => setTimeout(r, 3000));
     clearInterval(intervalRef.current);
-
     const analysis = analyzeCase(text);
     setResult(analysis);
     setLoading(false);
-
-    setTimeout(() => {
-      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 200);
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
   };
 
   const handleSentiment = (s) => {
     setSentiment(s);
-    if (s === "great") {
-      setTimeout(() => onOpenEval?.(), 500);
-    }
+    if (s === "great") setTimeout(() => onOpenEval?.(), 600);
   };
 
-  useEffect(() => {
-    return () => clearInterval(intervalRef.current);
-  }, []);
+  const tokenized = result?.tokenizedPreview || text
+    .replace(/\b[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-záàâãéêíóôõúç]+ [A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-záàâãéêíóôõúç]+\b/g, "[PESSOA_01]")
+    .replace(/TRCT/g, "[DOC_01]")
+    .replace(/FGTS/g, "[VERBA_01]");
+
+  useEffect(() => () => clearInterval(intervalRef.current), []);
 
   return (
-    <div className="page-bg min-h-screen pt-24 pb-20 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="bg-[#0A0A0F] min-h-screen pt-20 pb-24 px-4">
+      {/* Glow */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-[#D4AF37]/5 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="relative z-10 max-w-3xl mx-auto">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-10"
-        >
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 mb-4">
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="pt-8 pb-10">
+          <p className="text-xs font-semibold text-[#D4AF37] uppercase tracking-widest mb-4">
             Motor Socrático · Demonstração ao vivo
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">
-            Demonstrador{" "}
-            <span className="gold-text">Interativo</span>
+          </p>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-4">
+            Analise um caso.<br />
+            <span className="gold-text">Sem expor nenhum dado.</span>
           </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Descreva um caso jurídico e veja o LexMind construir uma trilha socrática
-            de raciocínio — sem entregar a resposta pronta.
+          <p className="text-gray-400 text-base leading-relaxed max-w-xl">
+            Descreva o caso com detalhes reais. A tokenização ocorre antes de qualquer chamada às IAs —
+            e em vez de uma resposta, você recebe uma trilha de raciocínio socrático.
           </p>
         </motion.div>
 
-        {/* Input card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="gradient-border-card p-6 sm:p-8 mb-6"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <label className="text-white font-semibold flex items-center gap-2">
-              <FileText className="w-4 h-4 text-[#D4AF37]" />
-              Descreva o caso jurídico
-            </label>
-            <button
-              onClick={handleUseExample}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 hover:bg-[#D4AF37]/20 transition-colors"
-              aria-label="Usar caso de exemplo automaticamente"
-            >
-              <Zap className="w-3 h-3" />
-              Usar exemplo
-            </button>
-          </div>
-
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Ex.: Meu cliente foi demitido sem justa causa após 10 anos. A empresa se recusa a pagar o FGTS..."
-            rows={5}
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-gray-200 placeholder-gray-500 text-sm resize-none focus:border-[#D4AF37] transition-colors"
-            aria-label="Campo para descrever o caso jurídico"
-          />
-
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <Shield className="w-3.5 h-3.5 text-green-400" />
-              <span>Dados protegidos por tokenização antes do envio à IA</span>
+        {/* Input area */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
+          <div className="relative mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-white text-sm font-semibold flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#D4AF37]" />
+                Descreva o caso jurídico
+              </label>
+              <button
+                onClick={handleUseExample}
+                className="flex items-center gap-1.5 text-xs font-semibold text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/20 px-3 py-1.5 rounded-lg hover:bg-[#D4AF37]/20 transition-colors"
+              >
+                <Zap className="w-3 h-3" />
+                Usar exemplo
+              </button>
             </div>
-            <span className="text-xs text-gray-500">{text.length} chars</span>
+
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Ex.: Meu cliente foi demitido sem justa causa após 10 anos de empresa. A empresa se recusa a pagar o FGTS..."
+              rows={5}
+              className="w-full bg-[#0D0D14] border border-white/10 rounded-xl px-4 py-3.5 text-gray-200 placeholder-gray-600 text-sm resize-none transition-all duration-200 focus:border-[#D4AF37]/60 focus:bg-[#0F0F18]"
+            />
+
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                <Shield className="w-3 h-3 text-green-500" />
+                Dados tokenizados antes de qualquer envio à IA
+              </div>
+              {text.length > 0 && <span className="text-xs text-gray-600">{text.length} chars</span>}
+            </div>
           </div>
 
-          {/* Token preview toggle */}
-          {text.length > 10 && (
-            <div className="mt-4">
+          {/* Token preview */}
+          {text.length > 15 && (
+            <div className="mb-4">
               <button
                 onClick={() => setTokenPreview(!tokenPreview)}
-                className="flex items-center gap-1.5 text-xs text-[#D4AF37] hover:underline"
+                className="flex items-center gap-1.5 text-xs text-[#D4AF37]/70 hover:text-[#D4AF37] transition-colors"
               >
                 <Lock className="w-3 h-3" />
                 {tokenPreview ? "Ocultar" : "Ver"} como a IA recebe o caso (tokenizado)
@@ -209,12 +190,14 @@ export default function Demonstrador({ onOpenEval }) {
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="mt-3 p-4 rounded-xl bg-black/40 border border-[#D4AF37]/20 font-mono text-xs text-green-300 leading-relaxed">
-                      <div className="text-[#D4AF37]/60 text-xs mb-2 font-sans">↳ Dado enviado às APIs (tokenizado):</div>
-                      {analyzeCase(text).tokenizedPreview || text
-                        .replace(/\b[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-záàâãéêíóôõúç]+ [A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-záàâãéêíóôõúç]+\b/g, "[PESSOA_01]")
-                        .replace(/TRCT/g, "[DOC_01]")
-                        .replace(/FGTS/g, "[VERBA_01]")}
+                    <div className="mt-2 rounded-xl bg-black/60 border border-[#D4AF37]/15 overflow-hidden">
+                      <div className="px-4 py-2 bg-[#D4AF37]/5 border-b border-[#D4AF37]/10 flex items-center gap-2">
+                        <Lock className="w-3 h-3 text-[#D4AF37]" />
+                        <span className="text-xs text-[#D4AF37]/70 font-mono">dado enviado às APIs (tokenizado)</span>
+                      </div>
+                      <div className="p-4 font-mono text-xs text-green-300/90 leading-relaxed">
+                        {tokenized}
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -225,90 +208,88 @@ export default function Demonstrador({ onOpenEval }) {
           <button
             onClick={handleAnalyze}
             disabled={!text.trim() || loading}
-            className={`mt-5 w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-base transition-all duration-300 ${
+            className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold text-sm transition-all duration-300 ${
               text.trim() && !loading
                 ? "btn-gold glow-gold-hover"
-                : "bg-white/5 text-gray-500 cursor-not-allowed"
+                : "bg-white/5 text-gray-600 cursor-not-allowed border border-white/5"
             }`}
-            aria-label="Analisar caso com LexMind"
           >
             {loading ? (
-              <>
-                <RefreshCw className="w-5 h-5 animate-spin" />
-                Processando...
-              </>
+              <><RefreshCw className="w-4 h-4 animate-spin" /> Processando...</>
             ) : (
-              <>
-                <Brain className="w-5 h-5" />
-                Analisar com LexMind
-              </>
+              <><Brain className="w-4 h-4" /> Analisar com LexMind</>
             )}
           </button>
         </motion.div>
 
-        {/* Loading state */}
+        {/* Loading */}
         <AnimatePresence>
           {loading && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="gradient-border-card p-8 mb-6"
+              exit={{ opacity: 0 }}
+              className="mt-6 rounded-2xl border border-white/8 bg-[#0D0D14] overflow-hidden"
             >
-              {/* Shield + Brain animation */}
-              <div className="flex items-center justify-center gap-6 mb-8">
+              {/* Animated header */}
+              <div className="h-1 bg-white/5 relative overflow-hidden">
                 <motion.div
-                  animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 flex items-center justify-center"
-                >
-                  <Shield className="w-8 h-8 text-[#D4AF37]" />
-                </motion.div>
-                <div className="flex gap-1">
-                  {[0, 1, 2].map((i) => (
-                    <motion.div
-                      key={i}
-                      className="w-2 h-2 rounded-full bg-[#D4AF37]"
-                      animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.2, 0.8] }}
-                      transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
-                    />
-                  ))}
-                </div>
-                <motion.div
-                  animate={{ opacity: [0.5, 1, 0.5], scale: [0.95, 1.05, 0.95] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/5 border border-purple-500/30 flex items-center justify-center"
-                >
-                  <Brain className="w-8 h-8 text-purple-400" />
-                </motion.div>
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#D4AF37] to-[#F0D060]"
+                  animate={{ width: `${((loadingStep + 1) / LOADING_STEPS.length) * 100}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
               </div>
 
-              {/* Steps */}
-              <div className="space-y-3 max-w-md mx-auto">
-                {LOADING_STEPS.map((step, i) => {
-                  const Icon = step.icon;
-                  const isActive = i === loadingStep;
-                  const isDone = i < loadingStep;
-                  return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: i <= loadingStep ? 1 : 0.2 }}
-                      className="flex items-center gap-3"
-                    >
-                      {isDone ? (
-                        <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
-                      ) : isActive ? (
-                        <RefreshCw className={`w-4 h-4 ${step.color} animate-spin shrink-0`} />
-                      ) : (
-                        <div className="w-4 h-4 rounded-full border border-white/10 shrink-0" />
-                      )}
-                      <p className={`text-xs ${isActive ? step.color : isDone ? "text-gray-400" : "text-gray-600"}`}>
-                        {step.text}
-                      </p>
-                    </motion.div>
-                  );
-                })}
+              <div className="p-7">
+                {/* Icons animation */}
+                <div className="flex items-center justify-center gap-4 mb-8">
+                  <motion.div
+                    animate={{ scale: [1, 1.06, 1], rotate: [0, 4, -4, 0] }}
+                    transition={{ duration: 2.5, repeat: Infinity }}
+                    className="w-14 h-14 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/20 flex items-center justify-center"
+                  >
+                    <Shield className="w-7 h-7 text-[#D4AF37]" />
+                  </motion.div>
+                  <div className="flex gap-1.5">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]/60"
+                        animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.2, 0.8] }}
+                        transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
+                      />
+                    ))}
+                  </div>
+                  <motion.div
+                    animate={{ opacity: [0.5, 1, 0.5], scale: [0.95, 1.05, 0.95] }}
+                    transition={{ duration: 1.8, repeat: Infinity }}
+                    className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center"
+                  >
+                    <Brain className="w-7 h-7 text-purple-400" />
+                  </motion.div>
+                </div>
+
+                <div className="space-y-3 max-w-sm mx-auto">
+                  {LOADING_STEPS.map((step, i) => {
+                    const Icon = step.icon;
+                    const done = i < loadingStep;
+                    const active = i === loadingStep;
+                    return (
+                      <motion.div key={i} animate={{ opacity: i <= loadingStep ? 1 : 0.2 }} className="flex items-center gap-3">
+                        {done ? (
+                          <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
+                        ) : active ? (
+                          <RefreshCw className={`w-4 h-4 ${step.color} animate-spin shrink-0`} />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full border border-white/10 shrink-0" />
+                        )}
+                        <p className={`text-xs ${active ? step.color : done ? "text-gray-400" : "text-gray-700"}`}>
+                          {step.text}
+                        </p>
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </div>
             </motion.div>
           )}
@@ -319,46 +300,41 @@ export default function Demonstrador({ onOpenEval }) {
           {result && (
             <motion.div
               ref={resultRef}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="mt-6 space-y-4"
             >
-              {/* LGPD badge */}
-              <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/20">
-                <Shield className="w-5 h-5 text-green-400 animate-shield" />
-                <span className="text-green-300 text-sm font-semibold">
-                  Dados anonimizados — em conformidade com a LGPD (tokenização real)
-                </span>
-                <CheckCircle className="w-4 h-4 text-green-400" />
+              {/* LGPD shield */}
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/8 border border-green-500/20">
+                <Shield className="w-5 h-5 text-green-400 shrink-0" />
+                <p className="text-green-300 text-sm font-semibold">
+                  Dados anonimizados — nenhuma informação pessoal chegou às APIs externas
+                </p>
+                <CheckCircle className="w-4 h-4 text-green-400 ml-auto shrink-0" />
               </div>
 
-              {/* Area + Legislation */}
-              <div className="gradient-border-card p-6">
-                <div className="flex flex-wrap items-center gap-3 mb-5">
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/30">
+              {/* Metadata */}
+              <div className="rounded-2xl bg-[#0D0D14] border border-white/8 overflow-hidden">
+                <div className="border-b border-white/5 px-6 py-4 flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <Scale className="w-4 h-4 text-[#D4AF37]" />
-                    <span className="text-[#D4AF37] font-bold text-sm">
-                      Área identificada: {result.area}
-                    </span>
+                    <span className="text-[#D4AF37] font-bold text-sm">{result.area}</span>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <Cpu className="w-3.5 h-3.5 text-blue-400" />
-                    <span className="text-blue-300 text-xs">GPT classificou • Claude orientou</span>
+                  <div className="ml-auto flex items-center gap-2 px-3 py-1 rounded-lg bg-purple-500/10 border border-purple-500/15">
+                    <Cpu className="w-3 h-3 text-purple-400" />
+                    <span className="text-purple-300 text-xs">GPT classificou · Claude orientou</span>
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-[#D4AF37]" />
-                    Legislação mapeada
-                  </h3>
+                <div className="px-6 py-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <BookOpen className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Legislação mapeada</span>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     {result.legislation.map((leg) => (
-                      <span
-                        key={leg}
-                        className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-gray-300 text-xs font-mono"
-                      >
+                      <span key={leg} className="px-2.5 py-1 rounded-lg bg-white/4 border border-white/8 text-gray-300 text-xs font-mono">
                         {leg}
                       </span>
                     ))}
@@ -366,135 +342,97 @@ export default function Demonstrador({ onOpenEval }) {
                 </div>
               </div>
 
-              {/* Socratic trail */}
-              <div>
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent" />
-                  <h2 className="text-white font-bold text-lg whitespace-nowrap flex items-center gap-2">
-                    <Brain className="w-5 h-5 text-[#D4AF37]" />
-                    Trilha de Raciocínio Jurídico
-                  </h2>
-                  <div className="flex-1 h-px bg-gradient-to-r from-[#D4AF37]/30 via-[#D4AF37]/30 to-transparent" />
-                </div>
-
-                <p className="text-center text-gray-400 text-xs mb-6 italic">
-                  "Responda a essas perguntas antes de definir a estratégia processual"
-                </p>
-
-                <div className="space-y-3">
-                  {result.questions.map((q, i) => (
-                    <QuestionCard key={q.id} q={q} index={i} delay={i * 0.08} />
-                  ))}
-                </div>
+              {/* Trail header */}
+              <div className="flex items-center gap-3 pt-2">
+                <Brain className="w-5 h-5 text-[#D4AF37]" />
+                <h2 className="text-white font-bold text-lg">Trilha de Raciocínio Jurídico</h2>
+                <span className="ml-auto text-xs text-gray-600 italic">
+                  Responda antes de definir a estratégia
+                </span>
               </div>
 
-              {/* Advanced button */}
+              <div className="space-y-2.5">
+                {result.questions.map((q, i) => (
+                  <QuestionCard key={q.id} q={q} index={i} delay={i * 0.07} />
+                ))}
+              </div>
+
+              {/* Deepen button */}
               {!showAdvanced && result.advanced?.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="text-center"
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
                   <button
                     onClick={() => setShowAdvanced(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl btn-outline-gold text-sm font-semibold group"
+                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-[#D4AF37]/20 text-[#D4AF37] text-sm font-semibold hover:bg-[#D4AF37]/5 transition-colors"
                   >
-                    <Zap className="w-4 h-4 group-hover:text-[#D4AF37] transition-colors" />
+                    <Zap className="w-4 h-4" />
                     Aprofundar raciocínio
-                    <span className="text-xs opacity-60">(+{result.advanced.length} perguntas avançadas)</span>
+                    <span className="text-[#D4AF37]/50 text-xs">(+{result.advanced.length} perguntas avançadas)</span>
                   </button>
                 </motion.div>
               )}
 
-              {/* Advanced questions */}
+              {/* Advanced */}
               <AnimatePresence>
                 {showAdvanced && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-3"
-                  >
-                    <div className="flex items-center gap-3 mb-2">
+                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-2.5">
+                    <div className="flex items-center gap-3 py-2">
                       <div className="flex-1 h-px bg-purple-500/20" />
                       <span className="text-purple-400 text-xs font-semibold">Nível Avançado — Aprofundamento Estratégico</span>
                       <div className="flex-1 h-px bg-purple-500/20" />
                     </div>
                     {result.advanced.map((q, i) => (
                       <QuestionCard
-                        key={q.id}
-                        q={q}
+                        key={q.id} q={q}
                         index={result.questions.length + i}
-                        delay={i * 0.1}
+                        delay={i * 0.08}
                       />
                     ))}
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* Sentiment + CTA */}
+              {/* Sentiment + reset */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
-                className="gradient-border-card p-6 text-center"
+                className="mt-6 rounded-2xl bg-[#0D0D14] border border-white/8 p-6 text-center"
               >
-                <p className="text-white font-semibold mb-4">
-                  Raciocine como um mestre do Direito.
-                  <br />
-                  <span className="text-gray-400 text-sm font-normal">
-                    Como foi a experiência com o Motor Socrático?
-                  </span>
-                </p>
+                <p className="text-white font-semibold text-sm mb-1">Raciocine como um mestre do Direito.</p>
+                <p className="text-gray-500 text-xs mb-5">Como foi a experiência com o Motor Socrático?</p>
 
-                <div className="flex justify-center gap-4 mb-6">
+                <div className="flex justify-center gap-3 mb-5">
                   {[
-                    { key: "great", icon: ThumbsUp, label: "Excelente", color: "hover:border-green-400 hover:text-green-400" },
-                    { key: "ok", icon: Meh, label: "Ok", color: "hover:border-yellow-400 hover:text-yellow-400" },
-                    { key: "bad", icon: ThumbsDown, label: "Ruim", color: "hover:border-red-400 hover:text-red-400" },
-                  ].map(({ key, icon: Icon, label, color }) => (
+                    { key: "great", icon: ThumbsUp, label: "Excelente", active: "border-green-400 text-green-400 bg-green-400/8" },
+                    { key: "ok", icon: Meh, label: "Razoável", active: "border-yellow-400 text-yellow-400 bg-yellow-400/8" },
+                    { key: "bad", icon: ThumbsDown, label: "Melhorar", active: "border-red-400 text-red-400 bg-red-400/8" },
+                  ].map(({ key, icon: Icon, label, active }) => (
                     <button
                       key={key}
                       onClick={() => handleSentiment(key)}
-                      className={`flex flex-col items-center gap-1 px-4 py-3 rounded-xl border transition-all duration-200 ${
-                        sentiment === key
-                          ? key === "great" ? "border-green-400 text-green-400 bg-green-400/10"
-                          : key === "ok" ? "border-yellow-400 text-yellow-400 bg-yellow-400/10"
-                          : "border-red-400 text-red-400 bg-red-400/10"
-                          : `border-white/10 text-gray-400 ${color}`
+                      className={`flex flex-col items-center gap-1.5 px-5 py-3 rounded-xl border text-xs transition-all duration-200 ${
+                        sentiment === key ? active : "border-white/10 text-gray-500 hover:border-white/20 hover:text-gray-300"
                       }`}
-                      aria-label={label}
                     >
                       <Icon className="w-5 h-5" />
-                      <span className="text-xs">{label}</span>
+                      {label}
                     </button>
                   ))}
                 </div>
 
                 {sentiment === "great" && (
-                  <motion.p
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-green-300 text-sm"
-                  >
-                    Que ótimo! Abrindo formulário de avaliação completo... 😊
+                  <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-green-300 text-xs mb-4">
+                    Abrindo formulário de avaliação completo... 😊
                   </motion.p>
                 )}
 
-                <div className="mt-4">
-                  <button
-                    onClick={() => {
-                      setResult(null);
-                      setText("");
-                      setSentiment(null);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
-                    className="text-xs text-gray-500 hover:text-[#D4AF37] transition-colors flex items-center gap-1 mx-auto"
-                  >
-                    <RefreshCw className="w-3 h-3" />
-                    Analisar outro caso
-                  </button>
-                </div>
+                <button
+                  onClick={() => { setResult(null); setText(""); setSentiment(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  className="text-xs text-gray-600 hover:text-[#D4AF37] transition-colors flex items-center gap-1 mx-auto"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  Analisar outro caso
+                </button>
               </motion.div>
             </motion.div>
           )}
